@@ -249,67 +249,24 @@ return;
 }
 
 const invoiceNo =
-
 "INV-" +
+Math.floor(1000 + Math.random()*9000);
 
-Math.floor(
-1000 +
-Math.random()*9000
-);
-
-document
-.getElementById("invoiceNo")
-.textContent =
+document.getElementById("invoiceNo").textContent =
 invoiceNo;
 
-document
-.getElementById("invoiceDate")
-.textContent =
+document.getElementById("invoiceDate").textContent =
 new Date().toLocaleString();
 
-document
-.getElementById("invoiceCustomer")
-.textContent =
-
-document
-.getElementById("customerName")
-.value ||
-
-"WALK-IN";
+document.getElementById("invoiceCustomer").textContent =
+document.getElementById("customerName").value || "WALK-IN";
 
 const invoiceProducts =
 document.getElementById("invoiceProducts");
 
 invoiceProducts.innerHTML = "";
+
 let total = 0;
-
-cart.forEach(item=>{
-
-total += Number(item.qty || 1);
-
-let productImage =
-"images/noimg.jpg";
-
-try{
-
-if(
-item.image &&
-typeof item.image === "string" &&
-item.image.trim() !== ""
-){
-
-productImage =
-item.image;
-
-}
-
-}catch(e){
-
-productImage =
-"images/noimg.jpg";
-
-}
-
 let itemNumber = 1;
 
 cart.forEach(item=>{
@@ -318,10 +275,12 @@ total += Number(item.qty || 1);
 
 let productImage = "images/noimg.jpg";
 
-if(item.image && item.image.trim() !== ""){
-
+if(
+item.image &&
+typeof item.image === "string" &&
+item.image.trim() !== ""
+){
 productImage = item.image;
-
 }
 
 invoiceProducts.innerHTML += `
@@ -329,9 +288,7 @@ invoiceProducts.innerHTML += `
 <div class="invoice-card">
 
 <div class="invoice-number">
-
 ${itemNumber}
-
 </div>
 
 <img
@@ -341,27 +298,19 @@ referrerpolicy="no-referrer"
 onerror="this.src='images/noimg.jpg'">
 
 <h4>
-
 ${item.name || ""}
-
 </h4>
 
 <p>
-
 ${item.description || ""}
-
 </p>
 
 <div class="invoice-sku">
-
 SKU : ${item.code || ""}
-
 </div>
 
 <div class="invoice-qty">
-
 العدد : ${item.qty || 1}
-
 </div>
 
 </div>
@@ -371,34 +320,15 @@ SKU : ${item.code || ""}
 itemNumber++;
 
 });
-`;
 
-});
+document.getElementById("invoiceTotal").textContent =
+cart.length;
 
-document.getElementById("invoiceTotal").textContent = cart.length;
-
-document.getElementById("invoiceQty").textContent = total;
+document.getElementById("invoiceQty").textContent =
+total;
 
 const invoice =
-document.getElementById(
-"invoiceTemplate"
-);
-
-invoice
-.querySelectorAll("img")
-.forEach(img=>{
-
-if(
-!img.src ||
-img.src === ""
-){
-
-img.src =
-"images/noimg.jpg";
-
-}
-
-});
+document.getElementById("invoiceTemplate");
 
 const images =
 invoice.querySelectorAll("img");
@@ -412,7 +342,6 @@ return new Promise(resolve=>{
 if(img.complete){
 
 resolve();
-
 return;
 
 }
@@ -421,17 +350,13 @@ img.onload = ()=>resolve();
 
 img.onerror = ()=>{
 
-img.src =
-"images/noimg.jpg";
+img.src = "images/noimg.jpg";
 
 resolve();
 
 };
 
-setTimeout(
-resolve,
-2000
-);
+setTimeout(resolve,2000);
 
 });
 
@@ -450,9 +375,7 @@ backgroundColor:"#ffffff"
 );
 
 const imgData =
-canvas.toDataURL(
-"image/png"
-);
+canvas.toDataURL("image/png");
 
 const pdf =
 new window.jspdf.jsPDF(
@@ -460,16 +383,15 @@ new window.jspdf.jsPDF(
 "mm",
 "A4"
 );
+
 const imgWidth = 210;
 
 const pageHeight = 297;
 
 const imgHeight =
-(canvas.height * imgWidth)
-/ canvas.width;
+(canvas.height * imgWidth) / canvas.width;
 
-let heightLeft =
-imgHeight;
+let heightLeft = imgHeight;
 
 let position = 0;
 
@@ -486,8 +408,7 @@ heightLeft -= pageHeight;
 
 while(heightLeft > 0){
 
-position =
-heightLeft - imgHeight;
+position = heightLeft - imgHeight;
 
 pdf.addPage();
 
@@ -504,9 +425,8 @@ heightLeft -= pageHeight;
 
 }
 
-pdf.save(
-invoiceNo + ".pdf"
-);
+pdf.save(invoiceNo + ".pdf");
+
 });
 
 if(cartSearch){
@@ -519,3 +439,4 @@ renderCart
 }
 
 renderCart();
+
