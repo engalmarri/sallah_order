@@ -310,56 +310,74 @@ productImage =
 
 }
 
-invoiceBody.innerHTML += `
+let itemNumber = 1;
 
-<tr>
+cart.forEach(item=>{
 
-<td class="img-cell">
+total += Number(item.qty || 1);
+
+let productImage = "images/noimg.jpg";
+
+if(item.image && item.image.trim() !== ""){
+
+productImage = item.image;
+
+}
+
+invoiceProducts.innerHTML += `
+
+<div class="invoice-card">
+
+<div class="invoice-number">
+
+${itemNumber}
+
+</div>
 
 <img
 src="${productImage}"
 crossorigin="anonymous"
 referrerpolicy="no-referrer"
-onerror="this.onerror=null;this.src='images/noimg.jpg';">
+onerror="this.src='images/noimg.jpg'">
 
-</td>
-
-<td>
-
-${item.code || ""}
-
-</td>
-
-<td>
-
-<strong>
+<h4>
 
 ${item.name || ""}
 
-</strong>
+</h4>
 
-<br>
+<p>
 
 ${item.description || ""}
 
-</td>
+</p>
 
-<td>
+<div class="invoice-sku">
 
-${item.qty || 1}
+SKU : ${item.code || ""}
 
-</td>
+</div>
 
-</tr>
+<div class="invoice-qty">
 
+العدد : ${item.qty || 1}
+
+</div>
+
+</div>
+
+`;
+
+itemNumber++;
+
+});
 `;
 
 });
 
-document
-.getElementById("invoiceTotal")
-.textContent =
-total;
+document.getElementById("invoiceTotal").textContent = cart.length;
+
+document.getElementById("invoiceQty").textContent = total;
 
 const invoice =
 document.getElementById(
