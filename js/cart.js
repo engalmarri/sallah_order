@@ -277,13 +277,10 @@ document
 
 "WALK-IN";
 
-const invoiceBody =
-document.getElementById(
-"invoiceBody"
-);
+const invoiceProducts =
+document.getElementById("invoiceProducts");
 
-invoiceBody.innerHTML = "";
-
+invoiceProducts.innerHTML = "";
 let total = 0;
 
 cart.forEach(item=>{
