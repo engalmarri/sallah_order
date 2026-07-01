@@ -1,442 +1,320 @@
-let cart =
-JSON.parse(
-localStorage.getItem("cart")
-) || [];
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-const cartItems =
-document.getElementById("cartItems");
+const cartItems = document.getElementById("cartItems");
+const cartTotal = document.getElementById("cartTotal");
+const cartSearch = document.getElementById("cartSearch");
+const customerNameInput = document.getElementById("customerName");
+const invoiceNoElement = document.getElementById("invoiceNo");
+const invoiceDateElement = document.getElementById("invoiceDate");
+const invoiceCustomerElement = document.getElementById("invoiceCustomer");
+const invoiceProducts = document.getElementById("invoiceProducts");
+const invoiceTotalElement = document.getElementById("invoiceTotal");
+const invoiceQtyElement = document.getElementById("invoiceQty");
+const invoiceTemplate = document.getElementById("invoiceTemplate");
+const COLUMNS_PER_INVOICE_ROW = 3;
 
-const cartTotal =
-document.getElementById("cartTotal");
-const cartSearch =
-document.getElementById("cartSearch");
-/* ==========================
-RENDER CART
-========================== */
+function escapeHTML(value){
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+function getItemQty(item){
+  const qty = parseInt(item.qty,10);
+  return isNaN(qty) || qty < 1 ? 1 : qty;
+}
+
+function getProductImage(item){
+  if(item.image && typeof item.image === "string" && item.image.trim() !== ""){
+    return item.image;
+  }
+  return "images/noimg.jpg";
+}
+
+function saveCart(){
+  localStorage.setItem("cart",JSON.stringify(cart));
+}
+
+function getCartTotalQty(){
+  return cart.reduce((sum,item)=> sum + getItemQty(item),0);
+}
 
 function renderCart(){
+  if(!cartItems) return;
 
-cartItems.innerHTML = "";
+  cartItems.innerHTML = "";
 
-const searchText =
+  const searchText = cartSearch ? cartSearch.value.trim().toLowerCase() : "";
 
-cartSearch
-? cartSearch.value.toLowerCase()
-: "";
-let totalProducts = 0;
+  cart.forEach(item=>{
+    const productText = `${item.name || ""} ${item.description || ""} ${item.code || ""}`.toLowerCase();
 
-cart.forEach(item=>{
-const productText =
+    if(searchText && !productText.includes(searchText)){
+      return;
+    }
 
-(
-(item.name || "") +
-" " +
-(item.description || "") +
-" " +
-(item.code || "")
-)
-.toLowerCase();
+    cartItems.insertAdjacentHTML("beforeend",`
+      <div class="cart-item">
+        <img src="${escapeHTML(getProductImage(item))}" alt="${escapeHTML(item.name || "Product")}" onerror="this.src='images/noimg.jpg'">
 
-if(
-searchText &&
-!productText.includes(searchText)
-){
-return;
-}
-totalProducts += Number(item.qty || 1);
+        <div class="info">
+          <h3>${escapeHTML(item.name || "")}</h3>
+          <p>${escapeHTML(item.description || "")}</p>
+          <p>SKU : ${escapeHTML(item.code || "")}</p>
 
-let productImage =
-"images/noimg.jpg";
+          <div class="qty-controls">
+            <button type="button" data-action="decrease" data-id="${escapeHTML(item.id)}">-</button>
+            <input type="number" min="1" value="${getItemQty(item)}" class="qty-input" data-id="${escapeHTML(item.id)}">
+            <button type="button" data-action="increase" data-id="${escapeHTML(item.id)}">+</button>
+          </div>
+        </div>
 
-try{
+        <button type="button" class="delete-cart-item" data-action="delete" data-id="${escapeHTML(item.id)}">حذف</button>
+      </div>
+    `);
+  });
 
-if(
-item.image &&
-typeof item.image === "string" &&
-item.image.trim() !== ""
-){
+  if(cartTotal){
+    cartTotal.textContent = getCartTotalQty();
+  }
 
-productImage =
-item.image;
-
+  saveCart();
 }
 
-}catch(e){
-
-productImage =
-"images/noimg.jpg";
-
+function findItem(id){
+  return cart.find(item => String(item.id) === String(id));
 }
 
-cartItems.innerHTML += `
-
-<div class="cart-item">
-
-<img
-src="${productImage}"
-onerror="this.src='images/noimg.jpg'">
-
-<div class="info">
-
-<h3>
-${item.name || ""}
-</h3>
-
-<p>
-${item.description || ""}
-</p>
-
-<p>
-SKU : ${item.code || ""}
-</p>
-
-<div>
-
-<button
-onclick="decreaseQty('${item.id}')">
-➖
-</button>
-
-<input
-type="number"
-min="1"
-value="${item.qty || 1}"
-class="qty-input"
-onchange="updateQty('${item.id}',this.value)">
-
-<button
-onclick="increaseQty('${item.id}')">
-➕
-</button>
-
-</div>
-
-</div>
-
-<button
-onclick="deleteItem('${item.id}')">
-🗑
-</button>
-
-</div>
-
-`;
-
-});
-
-cartTotal.textContent =
-totalProducts;
-
-localStorage.setItem(
-"cart",
-JSON.stringify(cart)
-);
-
+function increaseQty(id){
+  const item = findItem(id);
+  if(!item) return;
+  item.qty = getItemQty(item) + 1;
+  renderCart();
 }
 
-/* ==========================
-QUANTITY
-========================== */
+function decreaseQty(id){
+  const item = findItem(id);
+  if(!item) return;
 
-window.increaseQty =
-function(id){
+  item.qty = getItemQty(item) - 1;
 
-const item =
-cart.find(
-p => p.id === id
-);
+  if(item.qty <= 0){
+    cart = cart.filter(product => String(product.id) !== String(id));
+  }
 
-if(item){
-
-item.qty++;
-
-renderCart();
-
+  renderCart();
 }
 
-};
+function updateQty(id,value){
+  const item = findItem(id);
+  if(!item) return;
 
-window.decreaseQty =
-function(id){
-
-const item =
-cart.find(
-p => p.id === id
-);
-
-if(!item) return;
-
-item.qty--;
-
-if(item.qty <= 0){
-
-cart =
-cart.filter(
-p => p.id !== id
-);
-
+  const qty = parseInt(value,10);
+  item.qty = isNaN(qty) || qty < 1 ? 1 : qty;
+  renderCart();
 }
 
-renderCart();
-
-};
-
-window.updateQty =
-function(id,value){
-
-const item =
-cart.find(
-p => p.id === id
-);
-
-if(!item) return;
-
-const qty =
-parseInt(value);
-
-item.qty =
-isNaN(qty) || qty < 1
-? 1
-: qty;
-
-renderCart();
-
-};
-window.deleteItem =
-function(id){
-
-cart =
-cart.filter(
-p => p.id !== id
-);
-
-renderCart();
-
-};
-
-
-/* ==========================
-WHATSAPP
-========================== */
-
-document
-.getElementById("whatsappBtn")
-.addEventListener(
-"click",
-()=>{
-
-window.open(
-"https://wa.me/966538647362",
-"_blank"
-);
-
-});/* ==========================
-CREATE PDF
-========================== */
-
-document
-.getElementById("createInvoice")
-.addEventListener(
-"click",
-async()=>{
-
-if(cart.length===0){
-
-alert("السلة فارغة");
-
-return;
-
+function deleteItem(id){
+  cart = cart.filter(product => String(product.id) !== String(id));
+  renderCart();
 }
 
-const invoiceNo =
-"INV-" +
-Math.floor(1000 + Math.random()*9000);
-
-document.getElementById("invoiceNo").textContent =
-invoiceNo;
-
-document.getElementById("invoiceDate").textContent =
-new Date().toLocaleString();
-
-document.getElementById("invoiceCustomer").textContent =
-document.getElementById("customerName").value || "WALK-IN";
-
-const invoiceProducts =
-document.getElementById("invoiceProducts");
-
-invoiceProducts.innerHTML = "";
-
-let total = 0;
-let itemNumber = 1;
-
-cart.forEach(item=>{
-
-total += Number(item.qty || 1);
-
-let productImage = "images/noimg.jpg";
-
-if(
-item.image &&
-typeof item.image === "string" &&
-item.image.trim() !== ""
-){
-productImage = item.image;
+function makeInvoiceNumber(){
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2,"0");
+  const day = String(now.getDate()).padStart(2,"0");
+  const hours = String(now.getHours()).padStart(2,"0");
+  const minutes = String(now.getMinutes()).padStart(2,"0");
+  const seconds = String(now.getSeconds()).padStart(2,"0");
+  return `INV-${year}${month}${day}-${hours}${minutes}${seconds}`;
 }
 
-invoiceProducts.innerHTML += `
-
-<div class="invoice-card">
-
-<div class="invoice-number">
-${itemNumber}
-</div>
-
-<img
-src="${productImage}"
-crossorigin="anonymous"
-referrerpolicy="no-referrer"
-onerror="this.src='images/noimg.jpg'">
-
-<h4>
-${item.name || ""}
-</h4>
-
-<p>
-${item.description || ""}
-</p>
-
-<div class="invoice-sku">
-SKU : ${item.code || ""}
-</div>
-
-<div class="invoice-qty">
-العدد : ${item.qty || 1}
-</div>
-
-</div>
-
-`;
-
-itemNumber++;
-
-});
-
-document.getElementById("invoiceTotal").textContent =
-cart.length;
-
-document.getElementById("invoiceQty").textContent =
-total;
-
-const invoice =
-document.getElementById("invoiceTemplate");
-
-const images =
-invoice.querySelectorAll("img");
-
-await Promise.all(
-
-Array.from(images).map(img=>{
-
-return new Promise(resolve=>{
-
-if(img.complete){
-
-resolve();
-return;
-
+function formatInvoiceDate(){
+  return new Date().toLocaleString("ar-SA",{
+    year:"numeric",
+    month:"2-digit",
+    day:"2-digit",
+    hour:"2-digit",
+    minute:"2-digit"
+  });
 }
 
-img.onload = ()=>resolve();
-
-img.onerror = ()=>{
-
-img.src = "images/noimg.jpg";
-
-resolve();
-
-};
-
-setTimeout(resolve,2000);
-
-});
-
-})
-
-);
-
-const canvas =
-await html2canvas(
-invoice,
-{
-scale:2,
-useCORS:true,
-backgroundColor:"#ffffff"
-}
-);
-
-const imgData =
-canvas.toDataURL("image/png");
-
-const pdf =
-new window.jspdf.jsPDF(
-"P",
-"mm",
-"A4"
-);
-
-const imgWidth = 210;
-
-const pageHeight = 297;
-
-const imgHeight =
-(canvas.height * imgWidth) / canvas.width;
-
-let heightLeft = imgHeight;
-
-let position = 0;
-
-pdf.addImage(
-imgData,
-"PNG",
-0,
-position,
-imgWidth,
-imgHeight
-);
-
-heightLeft -= pageHeight;
-
-while(heightLeft > 0){
-
-position = heightLeft - imgHeight;
-
-pdf.addPage();
-
-pdf.addImage(
-imgData,
-"PNG",
-0,
-position,
-imgWidth,
-imgHeight
-);
-
-heightLeft -= pageHeight;
-
+function getInvoiceCustomerName(){
+  const name = customerNameInput ? customerNameInput.value.trim() : "";
+  return name || "عميل مباشر";
 }
 
-pdf.save(invoiceNo + ".pdf");
+function getItemDetails(item){
+  const details = [];
 
-});
+  if(item.code){
+    details.push(`SKU: ${escapeHTML(item.code)}`);
+  }
+
+  if(item.description){
+    details.push(escapeHTML(item.description));
+  }
+
+  return details.join(" | ");
+}
+
+function createInvoiceCells(item,index){
+  const details = getItemDetails(item);
+
+  return `
+    <td class="invoice-check-cell">
+      <span class="invoice-check-box"></span>
+    </td>
+    <td class="invoice-product-cell">
+      <div class="invoice-product-main">
+        <span class="invoice-product-number">${index}</span>
+        <strong>${escapeHTML(item.name || "")}</strong>
+      </div>
+      ${details ? `<div class="invoice-product-details">${details}</div>` : ""}
+    </td>
+    <td class="invoice-qty-cell">${getItemQty(item)}</td>
+  `;
+}
+
+function createEmptyInvoiceCells(){
+  return `
+    <td class="invoice-check-cell invoice-empty-cell"></td>
+    <td class="invoice-product-cell invoice-empty-cell"></td>
+    <td class="invoice-qty-cell invoice-empty-cell"></td>
+  `;
+}
+
+function renderInvoiceProducts(){
+  if(!invoiceProducts) return;
+
+  invoiceProducts.innerHTML = "";
+
+  for(let index = 0; index < cart.length; index += COLUMNS_PER_INVOICE_ROW){
+    const rowItems = cart.slice(index,index + COLUMNS_PER_INVOICE_ROW);
+    let rowHTML = "";
+
+    rowItems.forEach((item,rowIndex)=>{
+      rowHTML += createInvoiceCells(item,index + rowIndex + 1);
+    });
+
+    for(let empty = rowItems.length; empty < COLUMNS_PER_INVOICE_ROW; empty++){
+      rowHTML += createEmptyInvoiceCells();
+    }
+
+    invoiceProducts.insertAdjacentHTML("beforeend",`<tr>${rowHTML}</tr>`);
+  }
+}
+
+function waitForImages(container){
+  const images = container.querySelectorAll("img");
+
+  return Promise.all(Array.from(images).map(img=>{
+    return new Promise(resolve=>{
+      if(img.complete){
+        resolve();
+        return;
+      }
+
+      img.onload = ()=>resolve();
+      img.onerror = ()=>resolve();
+      setTimeout(resolve,2000);
+    });
+  }));
+}
+
+async function createInvoice(){
+  if(cart.length === 0){
+    alert("السلة فارغة");
+    return;
+  }
+
+  if(!invoiceTemplate || !invoiceNoElement || !invoiceDateElement || !invoiceCustomerElement || !invoiceTotalElement || !invoiceQtyElement){
+    alert("قالب الفاتورة غير موجود في الصفحة");
+    return;
+  }
+
+  const invoiceNo = makeInvoiceNumber();
+
+  invoiceNoElement.textContent = invoiceNo;
+  invoiceDateElement.textContent = formatInvoiceDate();
+  invoiceCustomerElement.textContent = getInvoiceCustomerName();
+
+  renderInvoiceProducts();
+
+  invoiceTotalElement.textContent = cart.length;
+  invoiceQtyElement.textContent = getCartTotalQty();
+
+  await waitForImages(invoiceTemplate);
+
+  const canvas = await html2canvas(invoiceTemplate,{
+    scale:2,
+    useCORS:true,
+    backgroundColor:"#ffffff",
+    windowWidth:invoiceTemplate.scrollWidth,
+    windowHeight:invoiceTemplate.scrollHeight
+  });
+
+  const imgData = canvas.toDataURL("image/png");
+  const pdf = new window.jspdf.jsPDF("P","mm","A4");
+  const imgWidth = 210;
+  const pageHeight = 297;
+  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  let heightLeft = imgHeight;
+  let position = 0;
+
+  pdf.addImage(imgData,"PNG",0,position,imgWidth,imgHeight);
+  heightLeft -= pageHeight;
+
+  while(heightLeft > 0){
+    position = heightLeft - imgHeight;
+    pdf.addPage();
+    pdf.addImage(imgData,"PNG",0,position,imgWidth,imgHeight);
+    heightLeft -= pageHeight;
+  }
+
+  pdf.save(`${invoiceNo}.pdf`);
+}
+
+if(cartItems){
+  cartItems.addEventListener("click",event=>{
+    const button = event.target.closest("button[data-action]");
+    if(!button) return;
+
+    const action = button.dataset.action;
+    const id = button.dataset.id;
+
+    if(action === "increase") increaseQty(id);
+    if(action === "decrease") decreaseQty(id);
+    if(action === "delete") deleteItem(id);
+  });
+
+  cartItems.addEventListener("change",event=>{
+    const input = event.target.closest(".qty-input");
+    if(!input) return;
+    updateQty(input.dataset.id,input.value);
+  });
+}
 
 if(cartSearch){
+  cartSearch.addEventListener("input",renderCart);
+}
 
-cartSearch.addEventListener(
-"input",
-renderCart
-);
+const createInvoiceButton = document.getElementById("createInvoice");
 
+if(createInvoiceButton){
+  createInvoiceButton.addEventListener("click",createInvoice);
+}
+
+const whatsappButton = document.getElementById("whatsappBtn");
+
+if(whatsappButton){
+  whatsappButton.addEventListener("click",()=>{
+    window.open("https://wa.me/966538647362","_blank");
+  });
 }
 
 renderCart();
-
