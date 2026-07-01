@@ -2,264 +2,176 @@
 <html lang="ar" dir="rtl">
 
 <head>
+  <meta charset="UTF-8">
 
-<meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+  <title>سلة المشتريات</title>
 
-<title>
-سلة المشتريات
-</title>
+  <link rel="stylesheet" href="css/style.css">
 
-<link rel="stylesheet"
-href="css/style.css">
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 
 <body>
 
 <header>
+  <img src="images/logo.png" class="logo" alt="Logo">
 
-<img
-src="images/logo.png"
-class="logo">
-
-<h1>
-
-سلة المشتريات
-
-<br>
-
-Shopping Cart
-
-</h1>
-
+  <h1>
+    سلة المشتريات
+    <br>
+    Shopping Cart
+  </h1>
 </header>
 
-<div class="cart-page">
+<main class="cart-page">
 
-<div>
+  <section>
+    <input
+      type="text"
+      id="cartSearch"
+      placeholder="Search Product..."
+      style="
+        width:100%;
+        padding:12px;
+        margin-bottom:15px;
+        border:1px solid #ddd;
+        border-radius:10px;
+        font-size:16px;
+      ">
 
-<input
-type="text"
-id="cartSearch"
-placeholder="Search Product..."
-style="
-width:100%;
-padding:12px;
-margin-bottom:15px;
-border:1px solid #ddd;
-border-radius:10px;
-font-size:16px;
-">
-<div id="cartItems"></div>
+    <div id="cartItems"></div>
+  </section>
 
+  <aside class="cart-summary">
+    <h2>
+      Items
+      <br>
+      <span id="cartTotal">0</span>
+    </h2>
+
+    <input
+      type="text"
+      id="customerName"
+      placeholder="اسم العميل - Customer Name">
+
+    <button id="createInvoice" type="button">
+      إنشاء فاتورة
+      <br>
+      Create Invoice
+    </button>
+
+    <button id="whatsappBtn" type="button">
+      واتساب
+      <br>
+      WhatsApp
+    </button>
+
+    <a href="index.html" class="back-btn">
+      العودة للمتجر
+      <br>
+      Back To Store
+    </a>
+  </aside>
+
+</main>
+
+<!-- INVOICE TEMPLATE -->
+
+<div id="invoiceTemplate" aria-hidden="true">
+  <div class="invoice-box">
+
+    <div class="invoice-brand">
+      <img src="images/logo.png" class="invoice-logo" alt="Logo">
+      <h1>فاتورة تجهيز الطلب</h1>
+    </div>
+
+    <div class="invoice-meta-line">
+      <div class="invoice-meta-item">
+        <span>اسم العميل</span>
+        <strong id="invoiceCustomer">عميل مباشر</strong>
+      </div>
+
+      <div class="invoice-meta-item">
+        <span>رقم الفاتورة</span>
+        <strong id="invoiceNo">INV-0000</strong>
+      </div>
+
+      <div class="invoice-meta-item">
+        <span>تاريخ الإنشاء</span>
+        <strong id="invoiceDate"></strong>
+      </div>
+    </div>
+
+    <table id="invoiceTable" class="invoice-table">
+      <colgroup>
+        <col class="invoice-check-col">
+        <col>
+        <col class="invoice-qty-col">
+
+        <col class="invoice-check-col">
+        <col>
+        <col class="invoice-qty-col">
+
+        <col class="invoice-check-col">
+        <col>
+        <col class="invoice-qty-col">
+      </colgroup>
+
+      <thead>
+        <tr>
+          <th>تم</th>
+          <th>المنتج</th>
+          <th>الكمية</th>
+
+          <th>تم</th>
+          <th>المنتج</th>
+          <th>الكمية</th>
+
+          <th>تم</th>
+          <th>المنتج</th>
+          <th>الكمية</th>
+        </tr>
+      </thead>
+
+      <tbody id="invoiceProducts"></tbody>
+    </table>
+
+    <div class="invoice-summary-row">
+      <div class="invoice-summary-item">
+        <span>إجمالي الأصناف</span>
+        <strong id="invoiceTotal">0</strong>
+      </div>
+
+      <div class="invoice-summary-item">
+        <span>إجمالي الكميات</span>
+        <strong id="invoiceQty">0</strong>
+      </div>
+    </div>
+
+    <div class="invoice-signatures">
+      <div class="invoice-signature">
+        <span>تم التجهيز بواسطة</span>
+        <div>الاسم / التوقيع</div>
+      </div>
+
+      <div class="invoice-signature">
+        <span>تمت المراجعة بواسطة</span>
+        <div>الاسم / التوقيع</div>
+      </div>
+
+      <div class="invoice-signature">
+        <span>تم الاستلام بواسطة</span>
+        <div>الاسم / التوقيع</div>
+      </div>
+    </div>
+
+  </div>
 </div>
 
-<div class="cart-summary">
-
-
-
-
-<h2>
-
-Items
-
-<br>
-
-<span id="cartTotal">
-
-0
-
-</span>
-
-</h2>
-
-<input
-type="text"
-id="customerName"
-
-placeholder="
-اسم العميل
-Customer Name
-">
-
-<button id="createInvoice">
-
-📄 إنشاء فاتورة
-Create Invoice
-
-</button>
-
-<button id="whatsappBtn">
-
-💬 واتساب
-WhatsApp
-
-</button>
-
-<a
-href="index.html"
-class="back-btn">
-
-⬅ العودة للمتجر
-Back To Store
-
-</a>
-
-</div>
-
-</div>
-
-<!-- =========================
-INVOICE TEMPLATE
-========================= -->
-
-<div id="invoiceTemplate"
-style="
-position:fixed;
-left:-99999px;
-top:0;
-width:1200px;
-background:#fff;
-padding:30px;
-">
-
-<div class="invoice-box">
-
-<!-- HEADER -->
-
-<div class="invoice-top">
-
-<div class="invoice-left">
-
-<h3>فاتورة</h3>
-
-<h2 id="invoiceNo">
-INV-0000
-</h2>
-
-<div class="invoice-date">
-
-📅
-
-<span id="invoiceDate"></span>
-
-</div>
-
-</div>
-
-<div class="invoice-center">
-
-<img
-src="images/logo.png"
-class="invoice-logo">
-
-</div>
-
-<div class="invoice-right">
-
-<div class="customer-title">
-
-العميل
-
-</div>
-
-<div
-class="customer-name"
-id="invoiceCustomer">
-
-البيع المباشر
-
-</div>
-
-</div>
-
-</div>
-
-<hr>
-
-<!-- PRODUCTS -->
-
-<div
-id="invoiceProducts"
-class="invoice-products">
-
-</div>
-
-<!-- FOOTER -->
-
-<div class="invoice-footer">
-
-<div class="footer-box">
-
-<div>
-
-إجمالي الأصناف
-
-</div>
-
-<h2 id="invoiceTotal">
-
-0
-
-</h2>
-
-</div>
-
-<div class="footer-box notes">
-
-<div>
-
-ملاحظات
-
-</div>
-
-<div class="note-line">
-
-....................................
-
-</div>
-
-</div>
-
-<div class="footer-box">
-
-<div>
-
-إجمالي الكميات
-
-</div>
-
-<h2 id="invoiceQty">
-
-0
-
-</h2>
-
-</div>
-
-</div>
-
-<div class="invoice-thanks">
-
-شكراً لتعاملكم معنا ❤️
-
-</div>
-
-</div>
-
-</div>
-<script
-type="module"
-src="js/cart.js">
-</script>
+<script type="module" src="js/cart.js"></script>
 
 </body>
-
 </html>
