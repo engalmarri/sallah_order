@@ -3,11 +3,13 @@
 
 <head>
   <meta charset="UTF-8">
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>سلة المشتريات</title>
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -78,98 +80,7 @@
 
 </main>
 
-<!-- INVOICE TEMPLATE -->
-
-<div id="invoiceTemplate" aria-hidden="true">
-  <div class="invoice-box">
-
-    <div class="invoice-brand">
-      <img src="images/logo.png" class="invoice-logo" alt="Logo">
-      <h1>فاتورة تجهيز الطلب</h1>
-    </div>
-
-    <div class="invoice-meta-line">
-      <div class="invoice-meta-item">
-        <span>اسم العميل</span>
-        <strong id="invoiceCustomer">عميل مباشر</strong>
-      </div>
-
-      <div class="invoice-meta-item">
-        <span>رقم الفاتورة</span>
-        <strong id="invoiceNo">INV-0000</strong>
-      </div>
-
-      <div class="invoice-meta-item">
-        <span>تاريخ الإنشاء</span>
-        <strong id="invoiceDate"></strong>
-      </div>
-    </div>
-
-    <table id="invoiceTable" class="invoice-table">
-      <colgroup>
-        <col class="invoice-check-col">
-        <col>
-        <col class="invoice-qty-col">
-
-        <col class="invoice-check-col">
-        <col>
-        <col class="invoice-qty-col">
-
-        <col class="invoice-check-col">
-        <col>
-        <col class="invoice-qty-col">
-      </colgroup>
-
-      <thead>
-        <tr>
-          <th>تم</th>
-          <th>المنتج</th>
-          <th>الكمية</th>
-
-          <th>تم</th>
-          <th>المنتج</th>
-          <th>الكمية</th>
-
-          <th>تم</th>
-          <th>المنتج</th>
-          <th>الكمية</th>
-        </tr>
-      </thead>
-
-      <tbody id="invoiceProducts"></tbody>
-    </table>
-
-    <div class="invoice-summary-row">
-      <div class="invoice-summary-item">
-        <span>إجمالي الأصناف</span>
-        <strong id="invoiceTotal">0</strong>
-      </div>
-
-      <div class="invoice-summary-item">
-        <span>إجمالي الكميات</span>
-        <strong id="invoiceQty">0</strong>
-      </div>
-    </div>
-
-    <div class="invoice-signatures">
-      <div class="invoice-signature">
-        <span>تم التجهيز بواسطة</span>
-        <div>الاسم / التوقيع</div>
-      </div>
-
-      <div class="invoice-signature">
-        <span>تمت المراجعة بواسطة</span>
-        <div>الاسم / التوقيع</div>
-      </div>
-
-      <div class="invoice-signature">
-        <span>تم الاستلام بواسطة</span>
-        <div>الاسم / التوقيع</div>
-      </div>
-    </div>
-
-  </div>
-</div>
+<div id="invoiceTemplate" aria-hidden="true"></div>
 
 <script type="module" src="js/cart.js"></script>
 
